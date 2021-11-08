@@ -1,3 +1,4 @@
+from werkzeug.utils import redirect
 from app import app
 from flask import render_template, request
 from app.models.users import db, Mahasiswa
@@ -22,6 +23,43 @@ def user():
 
 
 @app.route('/userCreate', methods=['POST', 'GET'])
-def userCreate():
-
+def userCreate():    
     return render_template("formcreate.html")
+
+
+@app.route('/userUpdate/<int:id>')
+def userUpdate(id):
+    konten = Mahasiswa.query.filter_by(id=id).first()
+    return render_template ("updateUser.html", data = konten)
+
+
+@app.route('/update', methods =['POST', 'GET'])
+def updateAction():
+    if request.method == 'POST':
+        id = request.form['id']
+        nama = request.form['nama']
+        kabupaten = request.form['kabupaten']
+        provinsi = request.form['provinsi']
+    try:
+        user = Mahasiswa.query.filter_by(id=id).first()
+        user.nama = nama
+        user.kabupaten = kabupaten
+        user.provinsi = provinsi
+        db.session.commit()
+    except Exception as e:
+            print("Failed to update data.")
+            print(e)
+    return redirect('/user')
+
+@app.route('/delete/<int:id>')
+def delete(id):
+    try:
+        user = Mahasiswa.query.filter_by(id=id).first()
+        db.session.delete(user)
+        db.session.commit()
+
+    except Exception as e:
+        print("Failed to update data.")
+        print(e)
+
+    return redirect('/user')
